@@ -91,9 +91,11 @@ defmodule Blitz.Clock do
   @impl GenServer
   def handle_call(:get_state, _from, %{id: id, clocks: clocks, current: current, count: count, status: status} = state) do
     initial_map = %{id: id, current: current, count: count, status: status}
-    reply = Enum.reduce(clocks, initial_map, fn {k, v}, acc ->
+    remainings = Enum.reduce(clocks, %{}, fn {k, v}, acc ->
       Map.put(acc, k, v.remaining)
     end)
+    reply = Map.put(initial_map, :remainings, remainings)
+
     {:reply, reply, state}
   end
 

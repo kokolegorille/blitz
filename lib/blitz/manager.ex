@@ -15,13 +15,12 @@ defmodule Blitz.Manager do
 
   @impl GenServer
   def init(args) do
-    # Process.flag(:trap_exit, true)
     {:ok, args}
   end
 
   @impl GenServer
   def handle_cast({:notify, message}, state) do
-    Logger.info message
+    Logger.info "Elapsed clock #{inspect message}"
 
     {:noreply, state}
   end

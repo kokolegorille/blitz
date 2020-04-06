@@ -16,6 +16,7 @@ defmodule Blitz do
   defdelegate start(clock), to: Clock
   defdelegate press(clock), to: Clock
   defdelegate stop(clock), to: Clock
+  defdelegate whereis_name(name), to: Clock
 
   defdelegate list_clocks(), to: ClockSup
 

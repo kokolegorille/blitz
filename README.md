@@ -1,6 +1,8 @@
 # Blitz
 
-**TODO: Add description**
+## Description
+
+Create blitz clocks for board games.
 
 ## Installation
 
