@@ -7,8 +7,9 @@ defmodule Blitz.Application do
 
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Blitz.Worker.start_link(arg)
-      # {Blitz.Worker, arg}
+      {Registry, keys: :unique, name: Registry.Clocks},
+      Blitz.Manager,
+      Blitz.ClockSup,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
