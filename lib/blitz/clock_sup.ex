@@ -4,13 +4,13 @@ defmodule Blitz.ClockSup do
   """
 
   use DynamicSupervisor
-  alias Blitz.Clock
+  alias Blitz.ClockWkr
 
   def start_link(_args),
     do: DynamicSupervisor.start_link(__MODULE__, nil, name: __MODULE__)
 
   def start_worker(args) do
-    DynamicSupervisor.start_child(__MODULE__, {Clock, [args]})
+    DynamicSupervisor.start_child(__MODULE__, {ClockWkr, [args]})
   end
 
   def init(_args) do
@@ -22,7 +22,7 @@ defmodule Blitz.ClockSup do
     __MODULE__
     |> DynamicSupervisor.which_children()
     |> Enum.map(fn {_, pid, _, _} ->
-      Clock.get_state(pid)
+      ClockWkr.get_state(pid)
     end)
   end
 end

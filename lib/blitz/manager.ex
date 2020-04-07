@@ -21,7 +21,6 @@ defmodule Blitz.Manager do
   @impl GenServer
   def handle_cast({:notify, message}, state) do
     Logger.info "Elapsed clock #{inspect message}"
-
     {:noreply, state}
   end
 

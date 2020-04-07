@@ -4,19 +4,19 @@ defmodule Blitz do
   This is the main module API.
   """
 
-  alias Blitz.{Clock, ClockSup, Periods}
+  alias Blitz.{ClockWkr, ClockSup, Clock, Periods}
   alias Periods.{Fischer, Simple, Absolute}
 
   @allowed_clock_types ~w(fischer simple absolute)a
-  @default_number_of_clocks 2
   @default_current 0
+  @default_number_of_periods 2
 
-  defdelegate get_state(clock), to: Clock
-  defdelegate pause(clock), to: Clock
-  defdelegate start(clock), to: Clock
-  defdelegate press(clock), to: Clock
-  defdelegate stop(clock), to: Clock
-  defdelegate whereis_name(name), to: Clock
+  defdelegate get_state(clock), to: ClockWkr
+  defdelegate pause(clock), to: ClockWkr
+  defdelegate start(clock), to: ClockWkr
+  defdelegate press(clock), to: ClockWkr
+  defdelegate stop(clock), to: ClockWkr
+  defdelegate whereis_name(name), to: ClockWkr
 
   defdelegate list_clocks(), to: ClockSup
 
@@ -30,20 +30,32 @@ defmodule Blitz do
   #
   def start_clock(type, id, args, opts \\ [])
   def start_clock(type, id, args, opts) when type in @allowed_clock_types do
-    period = apply(type_to_period(type), :new, args)
-    current = Keyword.get(opts, :current, @default_current)
-    number_of_clocks = Keyword.get(opts, :number_of_clocks, @default_number_of_clocks)
-    clocks = Enum.reduce(0..(number_of_clocks - 1), %{}, & Map.put(&2, &1, period))
-    worker_args = %{id: id, clocks: clocks, number_of_clocks: number_of_clocks, current: current}
-
-    case ClockSup.start_worker(worker_args) do
-      {:ok, pid} ->
-        {:ok, pid}
-      {:error, {:already_started, pid}} ->
-        {:ok, pid}
+    case build_clock(type, id, args, opts) do
+      {:ok, clock} ->
+        case ClockSup.start_worker(%{id: id, clock: clock}) do
+          {:ok, pid} ->
+            {:ok, pid}
+          {:error, {:already_started, pid}} ->
+            {:ok, pid}
+        end
+      {:error, reason} ->
+        {:error, reason}
     end
   end
   def start_clock(type, _id, _args, _opts), do: {:error, "unknown clock type #{type}"}
+
+  defp build_clock(type, id, args, opts) when type in @allowed_clock_types do
+    {:ok, Clock.new(build_params(type, id, args, opts))}
+  end
+  defp build_clock(type, _id, _args, _opts), do: {:error, "unknown clock type #{type}"}
+
+  defp build_params(type, id, args, opts) do
+    period = apply(type_to_period(type), :new, args)
+    current = Keyword.get(opts, :current, @default_current)
+    number_of_periods = Keyword.get(opts, :number_of_periods, @default_number_of_periods)
+    periods = Enum.reduce(0..(number_of_periods - 1), %{}, & Map.put(&2, &1, period))
+    %{id: id, periods: periods, number_of_periods: number_of_periods, current: current}
+  end
 
   defp type_to_period(:fischer),  do: Fischer
   defp type_to_period(:simple),   do: Simple
