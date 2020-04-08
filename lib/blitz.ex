@@ -44,10 +44,10 @@ defmodule Blitz do
   end
   def start_clock(type, _id, _args, _opts), do: {:error, "unknown clock type #{type}"}
 
-  defp build_clock(type, id, args, opts) when type in @allowed_clock_types do
+  def build_clock(type, id, args, opts) when type in @allowed_clock_types do
     {:ok, Clock.new(build_params(type, id, args, opts))}
   end
-  defp build_clock(type, _id, _args, _opts), do: {:error, "unknown clock type #{type}"}
+  def build_clock(type, _id, _args, _opts), do: {:error, "unknown clock type #{type}"}
 
   defp build_params(type, id, args, opts) do
     period = apply(type_to_period(type), :new, args)
