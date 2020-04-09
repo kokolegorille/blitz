@@ -51,10 +51,18 @@ defmodule Blitz.Clock do
   def pause(%__MODULE__{} = clock), do: log_error(:pause, clock)
 
   def press(%__MODULE__{status: :running} = clock) do
-    %{current: current, number_of_periods: number_of_periods, count: count} = clock
-    new_current = rem(current + 1, number_of_periods)
-    new_count = count + 1
-    {:ok, %{clock | current: new_current, count: new_count}}
+    %{current: current, periods: periods, number_of_periods: number_of_periods, count: count} = clock
+
+    current_period = periods[current]
+    case Period.press(current_period) do
+      {:ok, period} ->
+        new_periods = Map.put(periods, current, period)
+        new_current = rem(current + 1, number_of_periods)
+        new_count = count + 1
+        {:ok, %{clock | periods: new_periods, current: new_current, count: new_count}}
+      {:error, _reason} ->
+        %{clock | status: :error}
+      end
   end
   def press(%__MODULE__{} = clock), do: log_error(:press, clock)
 

@@ -6,6 +6,8 @@ defmodule Blitz.Manager do
 
   use GenServer
   require Logger
+  alias Blitz.Notifier
+
   @name __MODULE__
 
   def start_link(_),
@@ -20,7 +22,7 @@ defmodule Blitz.Manager do
 
   @impl GenServer
   def handle_cast({:notify, message}, state) do
-    Logger.info "Elapsed clock #{inspect message}"
+    notify(message)
     {:noreply, state}
   end
 
@@ -31,5 +33,10 @@ defmodule Blitz.Manager do
   def terminate(reason, _state) do
     Logger.info "#{__MODULE__} stopped : #{inspect(reason)}"
     :ok
+  end
+
+  defp notify(message) do
+    notifier = Application.get_env(:blitz, :notifier, Notifier)
+    notifier.notify(message)
   end
 end

@@ -145,7 +145,7 @@ defmodule Blitz.ClockWkr do
   @impl GenServer
   def handle_cast(:stop, %{clock: clock} = state) do
     {:ok, new_clock} = Clock.stop(clock)
-    {:stop, :normal, %{state | clock: new_clock}}
+    stop_and_notify(%{state | clock: new_clock}, new_clock)
   end
 
   @impl GenServer
